@@ -1,30 +1,18 @@
 (function () {
-  let settings = {}
-
+  // create the thumbnail
   const defaults = {
     0: {
       src: 'example-thumbnail.png'
     }
   }
+  const div = document.createElement('div')
+  const img = document.createElement('img')
 
-  function extend() {
-    var args, target, i, object, property
-    args = Array.prototype.slice.call(arguments)
-    target = args.shift() || {}
-    for (i in args) {
-      object = args[i]
-      for (property in object) {
-        if (object.hasOwnProperty(property)) {
-          if (typeof object[property] === 'object') {
-            target[property] = extend(target[property], object[property])
-          } else {
-            target[property] = object[property]
-          }
-        }
-      }
-    }
-    return target
-  }
+  // keep track of the duration to calculate correct thumbnail to display
+  let duration = 0
+  let progressControl = null
+  let player = null
+  let settings = {}
 
   function getComputedStyle(el, pseudo) {
     return function (prop) {
@@ -74,7 +62,7 @@
   }
 
   function updateOptions(options) {
-    settings = extend(settings, options)
+    settings = { ...settings, ...options }
   }
 
   function addFakeActivePseudoClass() {
@@ -97,20 +85,84 @@
     }
   }
 
+  function moveOnProgressControl(event) {
+    let mouseTime = 0
+    let time = 0
+    let active = 0
+    let left = 0
+    let setting = {}
+    let width = 0
+    let halfWidth = 0
+    let pageXOffset = getScrollOffset().x
+    let clientRect = offsetParent(progressControl.el()).getBoundingClientRect()
+    let right = (clientRect.width || clientRect.right) + pageXOffset
+    let pageX = event.changedTouches ? event.changedTouches[0].pageX : event.pageX
+
+    // find the page offset of the mouse
+    left = pageX || (event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft)
+    // subtract the page offset of the positioned offset parent
+    left -= offsetParent(progressControl.el()).getBoundingClientRect().left + pageXOffset
+
+    // apply updated styles to the thumbnail if necessary
+    // mouseTime is the position of the mouse along the progress control bar
+    // `left` applies to the mouse position relative to the player so we need
+    // to remove the progress control's left offset to know the mouse position
+    // relative to the progress control
+    mouseTime = Math.floor((left - progressControl.el().offsetLeft) / progressControl.width() * duration)
+    for (time in settings) {
+      if (mouseTime > time) {
+        active = Math.max(active, time)
+      }
+    }
+    setting = settings[active]
+
+    if (setting.src && img.src != setting.src) {
+      img.src = setting.src
+    }
+
+    if (setting.style) {
+      for (let styleProp of Object.keys(setting.style)) {
+        img.style[styleProp] = setting.style[styleProp]
+      }
+    }
+
+    width = getVisibleWidth(img, setting.width || settings[0].width)
+    halfWidth = width / 2
+
+    // make sure that the thumbnail doesn't fall off the right side of the left side of the player
+    if ((left + halfWidth) > right) {
+      left -= (left + halfWidth) - right
+    } else if (left < halfWidth) {
+      left = halfWidth
+    }
+
+    div.style.left = left + 'px'
+  }
+
+  function moveCancel(event) {
+    div.style.left = '-1000px'
+  }
+
+  function setupDuration() {
+    duration = player.duration()
+
+    // when the container is MP4
+    player.on('durationchange', function (event) {
+      duration = player.duration()
+    })
+
+    // when the container is HLS
+    player.on('loadedmetadata', function (event) {
+      duration = player.duration()
+    })
+  }
+
   /**
    * register the thubmnails plugin
    */
   videojs.plugin('thumbnails', function (options) {
-    // create the thumbnail
-    let div = document.createElement('div')
-    let img = document.createElement('img')
-    let player = this
-    let progressControl = player.controlBar.progressControl
-
-    // keep track of the duration to calculate correct thumbnail to display
-    let duration = player.duration()
-    let moveListener = null
-    let moveCancel = null
+    player = this
+    progressControl = player.controlBar.progressControl
 
     settings = { ...defaults, ...options }
 
@@ -119,6 +171,7 @@
     }
 
     addFakeActivePseudoClass()
+    setupDuration()
 
     div.className = 'vjs-thumbnail-holder'
     div.appendChild(img)
@@ -134,76 +187,12 @@
       }
     }
 
-    // when the container is MP4
-    player.on('durationchange', function (event) {
-      duration = player.duration()
-    })
-
-    // when the container is HLS
-    player.on('loadedmetadata', function (event) {
-      duration = player.duration()
-    })
-
     // add the thumbnail to the player
     progressControl.el().appendChild(div)
 
-    moveListener = function (event) {
-      let mouseTime = 0
-      let time = 0
-      let active = 0
-      let left = 0
-      let setting = {}
-      let width = 0
-      let halfWidth = 0
-      let pageXOffset = getScrollOffset().x
-      let clientRect = offsetParent(progressControl.el()).getBoundingClientRect()
-      let right = (clientRect.width || clientRect.right) + pageXOffset
-      let pageX = event.changedTouches ? event.changedTouches[0].pageX : event.pageX
-
-      // find the page offset of the mouse
-      left = pageX || (event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft)
-      // subtract the page offset of the positioned offset parent
-      left -= offsetParent(progressControl.el()).getBoundingClientRect().left + pageXOffset
-
-      // apply updated styles to the thumbnail if necessary
-      // mouseTime is the position of the mouse along the progress control bar
-      // `left` applies to the mouse position relative to the player so we need
-      // to remove the progress control's left offset to know the mouse position
-      // relative to the progress control
-      mouseTime = Math.floor((left - progressControl.el().offsetLeft) / progressControl.width() * duration)
-      for (time in settings) {
-        if (mouseTime > time) {
-          active = Math.max(active, time)
-        }
-      }
-      setting = settings[active]
-      if (setting.src && img.src != setting.src) {
-        img.src = setting.src
-      }
-      if (setting.style && img.style != setting.style) {
-        extend(img.style, setting.style)
-      }
-
-      width = getVisibleWidth(img, setting.width || settings[0].width)
-      halfWidth = width / 2
-
-      // make sure that the thumbnail doesn't fall off the right side of the left side of the player
-      if ((left + halfWidth) > right) {
-        left -= (left + halfWidth) - right
-      } else if (left < halfWidth) {
-        left = halfWidth
-      }
-
-      div.style.left = left + 'px'
-    }
-
     // update the thumbnail while hovering
-    progressControl.on('mousemove', moveListener)
-    progressControl.on('touchmove', moveListener)
-
-    moveCancel = function (event) {
-      div.style.left = '-1000px'
-    }
+    progressControl.on('mousemove', moveOnProgressControl)
+    progressControl.on('touchmove', moveOnProgressControl)
 
     // move the placeholder out of the way when not hovering
     progressControl.on('mouseout', moveCancel)
