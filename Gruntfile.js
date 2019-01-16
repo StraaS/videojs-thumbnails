@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
   grunt.initConfig({
     jshint: {
@@ -17,7 +17,15 @@ module.exports = function(grunt) {
     connect: {
       server: {
         options: {
-          keepalive: true
+          port: 8000
+        }
+      }
+    },
+    watch: {
+      js: {
+        files: ['dist/**/*.js'],
+        options: {
+          livereload: true
         }
       }
     }
@@ -25,6 +33,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('default', ['connect', 'watch']);
 };
