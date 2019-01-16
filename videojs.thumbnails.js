@@ -1,90 +1,105 @@
-(function() {
-  var defaults = {
-      0: {
-        src: 'example-thumbnail.png'
-      }
-    },
-    extend = function() {
-      var args, target, i, object, property;
-      args = Array.prototype.slice.call(arguments);
-      target = args.shift() || {};
-      for (i in args) {
-        object = args[i];
-        for (property in object) {
-          if (object.hasOwnProperty(property)) {
-            if (typeof object[property] === 'object') {
-              target[property] = extend(target[property], object[property]);
-            } else {
-              target[property] = object[property];
-            }
+(function () {
+  let settings = {};
+
+  const defaults = {
+    0: {
+      src: 'example-thumbnail.png'
+    }
+  }
+
+  function extend() {
+    var args, target, i, object, property;
+    args = Array.prototype.slice.call(arguments);
+    target = args.shift() || {};
+    for (i in args) {
+      object = args[i];
+      for (property in object) {
+        if (object.hasOwnProperty(property)) {
+          if (typeof object[property] === 'object') {
+            target[property] = extend(target[property], object[property]);
+          } else {
+            target[property] = object[property];
           }
         }
       }
-      return target;
-    },
-    getComputedStyle = function(el, pseudo) {
-      return function(prop) {
-        if (window.getComputedStyle) {
-          return window.getComputedStyle(el, pseudo)[prop];
-        } else {
-          return el.currentStyle[prop];
-        }
-      };
-    },
-    offsetParent = function(el) {
-      if (el.nodeName !== 'HTML' && getComputedStyle(el)('position') === 'static') {
-        return offsetParent(el.offsetParent);
-      }
-      return el;
-    },
-    getVisibleWidth = function(el, width) {
-      var clip;
+    }
+    return target;
+  }
 
-      if (width) {
-        return parseFloat(width);
+  function getComputedStyle(el, pseudo) {
+    return function (prop) {
+      if (window.getComputedStyle) {
+        return window.getComputedStyle(el, pseudo)[prop];
+      } else {
+        return el.currentStyle[prop];
       }
-
-      clip = getComputedStyle(el)('clip');
-      if (clip !== 'auto' && clip !== 'inherit') {
-        clip = clip.split(/(?:\(|\))/)[1].split(/(?:,| )/);
-        if (clip.length === 4) {
-          return (parseFloat(clip[1]) - parseFloat(clip[3]));
-        }
-      }
-      return 0;
-    },
-    getScrollOffset = function() {
-      if (window.pageXOffset) {
-        return {
-          x: window.pageXOffset,
-          y: window.pageYOffset
-        };
-      }
-      return {
-        x: document.documentElement.scrollLeft,
-        y: document.documentElement.scrollTop
-      };
     };
+  };
+
+  function offsetParent(el) {
+    if (el.nodeName !== 'HTML' && getComputedStyle(el)('position') === 'static') {
+      return offsetParent(el.offsetParent);
+    }
+    return el;
+  }
+
+  function getVisibleWidth(el, width) {
+    var clip;
+
+    if (width) {
+      return parseFloat(width);
+    }
+
+    clip = getComputedStyle(el)('clip');
+    if (clip !== 'auto' && clip !== 'inherit') {
+      clip = clip.split(/(?:\(|\))/)[1].split(/(?:,| )/);
+      if (clip.length === 4) {
+        return (parseFloat(clip[1]) - parseFloat(clip[3]));
+      }
+    }
+    return 0;
+  }
+
+  function getScrollOffset() {
+    if (window.pageXOffset) {
+      return {
+        x: window.pageXOffset,
+        y: window.pageYOffset
+      };
+    }
+    return {
+      x: document.documentElement.scrollLeft,
+      y: document.documentElement.scrollTop
+    };
+  }
+
+  function updateOptions(options) {
+    settings = extend(settings, options);    
+  }
 
   /**
    * register the thubmnails plugin
    */
-  videojs.plugin('thumbnails', function(options) {
-    var div, settings, img, player, progressControl, duration, moveListener, moveCancel;
+  videojs.plugin('thumbnails', function (options) {
+    var div, img, player, progressControl, duration, moveListener, moveCancel;
     settings = extend({}, defaults, options);
     player = this;
 
-    (function() {
+    videojs.thumbnails = {
+      updateOptions
+    };
+
+    (function () {
       var progressControl, addFakeActive, removeFakeActive;
       // Android doesn't support :active and :hover on non-anchor and non-button elements
       // so, we need to fake the :active selector for thumbnails to show up.
       if (navigator.userAgent.toLowerCase().indexOf("android") !== -1) {
         progressControl = player.controlBar.progressControl;
 
-        addFakeActive = function() {
+        addFakeActive = function () {
           progressControl.addClass('fake-active');
         };
-        removeFakeActive = function() {
+        removeFakeActive = function () {
           progressControl.removeClass('fake-active');
         };
 
@@ -105,21 +120,21 @@
 
     // center the thumbnail over the cursor if an offset wasn't provided
     if (!img.style.left && !img.style.right) {
-      img.onload = function() {
+      img.onload = function () {
         img.style.left = -(img.naturalWidth / 2) + 'px';
       };
     }
 
     // keep track of the duration to calculate correct thumbnail to display
     duration = player.duration();
-    
+
     // when the container is MP4
-    player.on('durationchange', function(event) {
+    player.on('durationchange', function (event) {
       duration = player.duration();
     });
 
     // when the container is HLS
-    player.on('loadedmetadata', function(event) {
+    player.on('loadedmetadata', function (event) {
       duration = player.duration();
     });
 
@@ -127,7 +142,7 @@
     progressControl = player.controlBar.progressControl;
     progressControl.el().appendChild(div);
 
-    moveListener = function(event) {
+    moveListener = function (event) {
       var mouseTime, time, active, left, setting, pageX, right, width, halfWidth, pageXOffset, clientRect;
       active = 0;
       pageXOffset = getScrollOffset().x;
@@ -167,7 +182,7 @@
       halfWidth = width / 2;
 
       // make sure that the thumbnail doesn't fall off the right side of the left side of the player
-      if ( (left + halfWidth) > right ) {
+      if ((left + halfWidth) > right) {
         left -= (left + halfWidth) - right;
       } else if (left < halfWidth) {
         left = halfWidth;
@@ -180,7 +195,7 @@
     progressControl.on('mousemove', moveListener);
     progressControl.on('touchmove', moveListener);
 
-    moveCancel = function(event) {
+    moveCancel = function (event) {
       div.style.left = '-1000px';
     };
 
