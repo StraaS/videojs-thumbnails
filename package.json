@@ -1,9 +1,16 @@
 {
   "name": "videojs-thumbnails",
   "description": "progress bar thumbnails plugin for video.js",
+  "browserslist": [
+    "> 1%",
+    "not dead"
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:brightcove/videojs-thumbnails.git"
+  },
+  "scripts": {
+    "build": "babel src --out-dir dist"
   },
   "version": "0.1.1",
   "devDependencies": {
