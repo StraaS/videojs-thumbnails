@@ -5,7 +5,7 @@
     0: {
       src: 'example-thumbnail.png'
     }
-  }
+  };
 
   function extend() {
     var args, target, i, object, property;
