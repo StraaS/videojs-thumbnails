@@ -5,6 +5,26 @@
     "> 1%",
     "not dead"
   ],
+  "eslintConfig": {
+    "extends": "airbnb-base",
+    "parser": "babel-eslint",
+    "env": {
+      "browser": true,
+      "es6": true
+    },
+    "globals": {
+      "videojs": true
+    },
+    "rules": {
+      "semi": [
+        "error",
+        "never"
+      ],
+      "global-require": [
+        "off"
+      ]
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:brightcove/videojs-thumbnails.git"
