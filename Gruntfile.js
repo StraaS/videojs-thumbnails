@@ -1,39 +1,54 @@
-'use strict';
-
-module.exports = function (grunt) {
+module.exports = function configureGrunt(grunt) {
+  require('load-grunt-tasks')(grunt)
 
   grunt.initConfig({
-    jshint: {
-      gruntfile: {
-        src: 'Gruntfile.js',
-        options: {
-          node: true
-        }
+    eslint: {
+      default: {
+        src: ['src/**/*.js'],
       },
-      src: {
-        src: 'videojs.thumbnails.js'
-      }
     },
     connect: {
       server: {
         options: {
-          port: 8000
-        }
-      }
+          port: 8000,
+        },
+      },
     },
     watch: {
       js: {
-        files: ['dist/**/*.js'],
+        files: ['src/**/*.js'],
+        tasks: ['eslint', 'babel'],
         options: {
-          livereload: true
-        }
-      }
-    }
+          livereload: true,
+        },
+      },
+      css: {
+        files: ['src/**/*.css'],
+        tasks: ['copy'],
+      },
+    },
+    copy: {
+      css: {
+        files: [
+          {
+            expand: true,
+            cwd: 'src/',
+            src: ['./**/*.css'],
+            dest: 'dist/',
+          },
+        ],
+      },
+    },
+    babel: {
+      output: {
+        expand: true,
+        cwd: './src',
+        src: './**/*.js',
+        dest: 'dist/',
+      },
+    },
   });
 
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-
-  grunt.registerTask('default', ['connect', 'watch']);
-};
+  grunt.registerTask('dev', ['eslint', 'connect', 'babel', 'copy', 'watch'])
+  grunt.registerTask('build', ['eslint', 'babel', 'copy'])
+}
