@@ -2,22 +2,42 @@ module.exports = function configureGrunt(grunt) {
   require('load-grunt-tasks')(grunt)
 
   grunt.initConfig({
-    eslint: {
-      default: {
-        src: ['src/**/*.js'],
+    parallel: {
+      development: {
+        options: {
+          stream: true,
+        },
+        tasks: [
+          {
+            grunt: true,
+            args: ['connect'],
+          },
+          {
+            grunt: true,
+            args: ['watch'],
+          },
+          {
+            grunt: true,
+            args: ['copy'],
+          },
+          {
+            grunt: true,
+            args: ['shell:rollupDev'],
+          },
+        ],
       },
     },
     connect: {
       server: {
         options: {
           port: 8000,
+          keepalive: true,
         },
       },
     },
     watch: {
       js: {
         files: ['src/**/*.js'],
-        tasks: ['eslint', 'babel'],
         options: {
           livereload: true,
         },
@@ -39,16 +59,15 @@ module.exports = function configureGrunt(grunt) {
         ],
       },
     },
-    babel: {
-      output: {
-        expand: true,
-        cwd: './src',
-        src: './**/*.js',
-        dest: 'dist/',
+    shell: {
+      rollupDev: {
+        command: './node_modules/.bin/rollup -c rollup.config.js -w',
+      },
+      rollupProd: {
+        command: './node_modules/.bin/rollup -c rollup.config.js',
       },
     },
-  });
+  })
 
-  grunt.registerTask('dev', ['eslint', 'connect', 'babel', 'copy', 'watch'])
-  grunt.registerTask('build', ['eslint', 'babel', 'copy'])
+  grunt.registerTask('build', ['copy', 'shell:rollupProd'])
 }
