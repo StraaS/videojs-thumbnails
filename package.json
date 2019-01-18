@@ -22,6 +22,15 @@
       ],
       "global-require": [
         "off"
+      ],
+      "implicit-arrow-linebreak": [
+        "off", "beside"
+      ],
+      "brace-style": [
+        "error", "stroustrup"
+      ],
+      "no-bitwise": [
+        "off"
       ]
     }
   },
