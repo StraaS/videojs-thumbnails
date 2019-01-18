@@ -41,8 +41,8 @@
     "url": "git@github.com:brightcove/videojs-thumbnails.git"
   },
   "scripts": {
-    "build": "grunt build",
-    "dev": "grunt parallel:development"
+    "build": "./node_modules/.bin/rollup -c --environment BUILD:production",
+    "dev": "./node_modules/.bin/rollup -c -w --environment BUILD:development"
   },
   "version": "0.1.1",
   "license": "MIT",
