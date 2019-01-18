@@ -194,15 +194,16 @@ class Thumbnails {
       validatedOptions = Thumbnails.mergeSettings(validatedOptions, newOptions)
     }
 
-    this.settings = Thumbnails.mergeSettings(this.settings, validatedOptions)
-
-    Thumbnails.validateTileSettings(this.settings)
-
-    this.settings.grid.tileSettings.forEach((tileSetting) => {
+    validatedOptions.grid.tileSettings.forEach((tileSetting) => {
       if (!tileSetting.src) {
         tileSetting.src = this.getImageSrc()
       }
     })
+
+    this.settings = Thumbnails.mergeSettings(this.settings, validatedOptions)
+
+    Thumbnails.validateTileSettings(this.settings)
+
     this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
   }
 
