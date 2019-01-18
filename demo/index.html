@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
   <title>Video.js Thumbnails Example</title>
   <link href="/node_modules/video.js/dist/video-js/video-js.css" rel="stylesheet">
@@ -10,84 +11,55 @@
       border: thin solid #777;
       padding: 10px;
     }
+
+    .vjs-thumbnail {
+      background-color: #fff
+    }
   </style>
-<script src="/node_modules/video.js/dist/video-js/video.js"></script>
-<script src='/dist/videojs-thumbnails.js'></script>
-<script src="//localhost:35729/livereload.js"></script>
+  <script src="/node_modules/video.js/dist/video-js/video.js"></script>
+  <script src='/dist/videojs-thumbnails.js'></script>
+  <script src="//localhost:35729/livereload.js"></script>
 </head>
+
 <body>
-<p>The thumbnails plugin displays a series of images over the player
-progress bar when the viewer hovers over it or drags the playhead
-around to seek. Give it a shot:</p>
+  <p>The thumbnails plugin displays a series of images over the player
+    progress bar when the viewer hovers over it or drags the playhead
+    around to seek. Give it a shot:</p>
 
-<video id='video'
-       class='video-js vjs-default-skin'
-       width='640'
-       height='264'
-       poster='http://vjs.zencdn.net/v/oceans.png'
-       controls>
-  <source src='http://vjs.zencdn.net/v/oceans.mp4' type='video/mp4' />
-</video>
-<script>
-// initialize video.js
-var video = videojs('video');
+  <video id='video' class='video-js vjs-default-skin' width='640' height='264' poster='http://vjs.zencdn.net/v/oceans.png'
+    controls>
+    <source src='http://vjs.zencdn.net/v/oceans.mp4' type='video/mp4' />
+  </video>
+  <script>
+    // initialize video.js
+    var video = videojs('video');
 
-// here's an example of generating thumbnails from a sprited image:
-video.thumbnails({
-  grid: {
-    src: './1264388-essentials-botton.png',
-    tileWidth: 100,
-    tileHeight: 94,
-    tileSettings: [
-      {
-        position: 0,
-        columnIndex: 0,
-        rowIndex: 0,
+    // here's an example of generating thumbnails from a sprited image:
+    video.thumbnails({
+      grid: {
+        src: './test1.png',
+        tileWidth: 100,
+        tileHeight: 94,
+        leftToRightAllocation: {
+          columnNumber: 3,
+          rowNumber: 3,
+          interval: 5,
+        },
       },
-      {
-        position: 5,
-        columnIndex: 1,
-        rowIndex: 0,
-      },
-      {
-        position: 10,
-        columnIndex: 2,
-        rowIndex: 0,
-      },
-      {
-        position: 15,
-        columnIndex: 0,
-        rowIndex: 1,
-      },
-      {
-        position: 20,
-        columnIndex: 1,
-        rowIndex: 1,
-      },
-      {
-        position: 25,
-        columnIndex: 2,
-        rowIndex: 1,
-      },
-      {
-        position: 30,
-        columnIndex: 0,
-        rowIndex: 2,
-      },
-      {
-        position: 35,
-        columnIndex: 1,
-        rowIndex: 2,
-      },
-      {
-        position: 40,
-        columnIndex: 2,
-        rowIndex: 2,
-      },
-    ],
-  },
-});
+    });
 
-</script>
+    videojs.thumbnails.updateOptions({
+      grid: {
+        src: './test2.png',
+        leftToRightAllocation: {
+          columnNumber: 3,
+          rowNumber: 3,
+          interval: 5,
+          startPosition: 2,
+        },
+      },
+    })
+  </script>
 </body>
+
 </html>

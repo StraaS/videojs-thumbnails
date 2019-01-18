@@ -1,16 +1,16 @@
 function getValidListIndex(list, index) {
   if (index >= list.length) {
-    return list.length - 1
+    return null
   }
 
   if (index < 0) {
-    return 0
+    return null
   }
 
   return index
 }
 
-export default function binarySearchClosetRange(list, target, identifier) {
+export default function binarySearchRange(list, target, identifier) {
   let lowIndex = -1
   let highIndex = list.length
   let middleIndex = 0
