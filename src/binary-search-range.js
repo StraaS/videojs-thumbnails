@@ -1,10 +1,10 @@
 function getValidListIndex(list, index) {
   if (index >= list.length) {
-    return list.length - 1
+    return null
   }
 
   if (index < 0) {
-    return 0
+    return null
   }
 
   return index

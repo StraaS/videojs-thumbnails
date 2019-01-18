@@ -242,6 +242,15 @@ class Thumbnails {
     progressControl.on('touchcancel', removeFakeActive)
   }
 
+  setTileContainerActive(isActive) {
+    if (isActive) {
+      this.tileContainer.classList.add('active')
+    }
+    else {
+      this.tileContainer.classList.remove('active')
+    }
+  }
+
   moveTileContainerBackground(currentTile) {
     const imageSrc = this.getImageSrc(currentTile)
     const left = -1 * currentTile.columnIndex * this.settings.grid.tileWidth
@@ -283,7 +292,13 @@ class Thumbnails {
       (list, index) => list[index].position,
     )
 
-    this.moveTileContainerBackground(this.settings.grid.tileSettings[tileIndex])
+    if (tileIndex !== null) {
+      this.setTileContainerActive(true)
+      this.moveTileContainerBackground(this.settings.grid.tileSettings[tileIndex])
+    }
+    else {
+      this.setTileContainerActive(false)
+    }
 
     const halfWidth = this.settings.grid.tileWidth / 2
 
