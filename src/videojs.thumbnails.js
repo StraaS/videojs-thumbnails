@@ -16,7 +16,7 @@ class Thumbnails {
     this.installListeners()
   }
 
-  static getImageSrc(options) {
+  getImageSrc(options) {
     if (options && options.src) return options.src
     return this.settings && this.settings.grid && this.settings.grid.src
   }
@@ -55,7 +55,7 @@ class Thumbnails {
     }
   }
 
-  static parseLeftToRightTileAllocation(options) {
+  parseLeftToRightTileAllocation(options) {
     if (!_.isObject(options.grid)) {
       return []
     }
@@ -80,7 +80,7 @@ class Thumbnails {
     }
 
     const { columnNumber, rowNumber, interval } = leftToRightAllocation
-    const src = Thumbnails.getImageSrc(grid)
+    const src = this.getImageSrc(grid)
 
     let startPosition = (leftToRightAllocation.startPosition || 0) - interval
 
@@ -148,7 +148,7 @@ class Thumbnails {
 
   prepareUi() {
     const { tileWidth, tileHeight } = this.settings.grid
-    const imageSrc = Thumbnails.getImageSrc()
+    const imageSrc = this.getImageSrc()
 
     this.tileContainer = document.createElement('div')
 
@@ -183,7 +183,7 @@ class Thumbnails {
 
     let validatedOptions = options
 
-    const tileSettings = Thumbnails.parseLeftToRightTileAllocation(options)
+    const tileSettings = this.parseLeftToRightTileAllocation(options)
     if (tileSettings.length) {
       const newOptions = {
         grid: {
@@ -197,6 +197,12 @@ class Thumbnails {
     this.settings = Thumbnails.mergeSettings(this.settings, validatedOptions)
 
     Thumbnails.validateTileSettings(this.settings)
+
+    this.settings.grid.tileSettings.forEach((tileSetting) => {
+      if (!tileSetting.src) {
+        tileSetting.src = this.getImageSrc()
+      }
+    })
     this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
   }
 
@@ -231,7 +237,7 @@ class Thumbnails {
   }
 
   moveTileContainerBackground(currentTile) {
-    const imageSrc = Thumbnails.getImageSrc(currentTile)
+    const imageSrc = this.getImageSrc(currentTile)
     const left = -1 * currentTile.columnIndex * this.settings.grid.tileWidth
     const top = -1 * currentTile.rowIndex * this.settings.grid.tileHeight
 
