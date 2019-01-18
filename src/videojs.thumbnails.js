@@ -210,7 +210,13 @@ class Thumbnails {
     this.mergeOptions(options, true)
   }
 
-  updateOptions(options) {
+  updateOptions(options, controlUpdatingBehavior) {
+    if (_.isObject(controlUpdatingBehavior)) {
+      if (controlUpdatingBehavior.resetTileSettings) {
+        this.settings.grid.tileSettings = []
+      }
+    }
+
     this.mergeOptions(options, false)
   }
 
