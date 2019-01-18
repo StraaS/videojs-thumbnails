@@ -16,7 +16,7 @@ export default function binarySearchClosetRange(list, target, identifier) {
   let middleIndex = 0
   let middleValue = null
 
-  do {
+  while (highIndex - lowIndex > 1) {
     middleIndex = Math.floor((lowIndex + highIndex) / 2)
     if (middleIndex === list.length) {
       middleValue = +Infinity
@@ -38,7 +38,7 @@ export default function binarySearchClosetRange(list, target, identifier) {
       const returnedIndex = getValidListIndex(list, middleIndex)
       return [returnedIndex, returnedIndex]
     }
-  } while (highIndex - lowIndex > 1)
+  }
 
   return [getValidListIndex(list, lowIndex), getValidListIndex(list, highIndex)]
 }

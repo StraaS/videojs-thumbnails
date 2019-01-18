@@ -1,6 +1,8 @@
 import * as _ from 'lodash'
 import binarySearchClosetRange from './binary-search-closet-range'
 
+import './videojs.thumbnails.css'
+
 class Thumbnails {
   constructor(player, options) {
     Thumbnails.validateConstructorSettings(options)
