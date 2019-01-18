@@ -9,22 +9,23 @@ class Thumbnails {
 
     this.player = player
     this.settings = {}
-    this.mergeOptionsToSettings(options)
     this.moveOnProgressControl = this.moveOnProgressControl.bind(this)
     this.moveCancel = this.moveCancel.bind(this)
 
+    this.updateOptions(options)
     this.prepareUi()
     this.addFakeActivePseudoClass()
     this.installListeners()
   }
 
+  static getImageSrc(options) {
+    if (options && options.src) return options.src
+    return this.settings && this.settings.grid && this.settings.grid.src
+  }
+
   static validateConstructorSettings(options) {
     if (!_.isObject(options.grid)) {
       throw new Error('`options.grid` must be an object')
-    }
-
-    if (!_.isString(options.grid.src)) {
-      throw new Error('`options.grid.src` must be a valid image url')
     }
 
     if (!_.isFinite(options.grid.tileWidth)) {
@@ -34,7 +35,9 @@ class Thumbnails {
     if (!_.isFinite(options.grid.tileHeight)) {
       throw new Error('`options.grid.tileHeight` must be a number')
     }
+  }
 
+  static validateTileSettings(options) {
     if (!Array.isArray(options.grid.tileSettings)) {
       throw new Error('`options.grid.tileSettings` must be an array')
     }
@@ -50,6 +53,53 @@ class Thumbnails {
     if (validTileSettings.length !== options.grid.tileSettings.length) {
       throw new Error('`each element of options.grid.tileSettings` must have columnIndex and rowIndex keys which both are numerical values')
     }
+  }
+
+  static parseLeftToRightTileAllocation(options) {
+    if (!_.isObject(options.grid)) {
+      return []
+    }
+
+    if (!_.isObject(options.grid.leftToRightAllocation)) {
+      return []
+    }
+
+    const { grid } = options
+    const { leftToRightAllocation } = grid
+
+    if (!_.isFinite(leftToRightAllocation.columnNumber)) {
+      throw new Error('`leftToRightAllocation.columnNumber` must be an number')
+    }
+
+    if (!_.isFinite(leftToRightAllocation.rowNumber)) {
+      throw new Error('`leftToRightAllocation.rowNumber` must be an number')
+    }
+
+    if (!_.isFinite(leftToRightAllocation.interval)) {
+      throw new Error('`leftToRightAllocation.interval` must be an number')
+    }
+
+    const { columnNumber, rowNumber, interval } = leftToRightAllocation
+    const src = Thumbnails.getImageSrc(grid)
+
+    let startPosition = (leftToRightAllocation.startPosition || 0) - interval
+
+    const tileSettings = []
+
+    for (let rowIndex = 0; rowIndex < rowNumber; ++rowIndex) {
+      for (let columnIndex = 0; columnIndex < columnNumber; ++columnIndex) {
+        startPosition += interval
+
+        tileSettings.push({
+          src,
+          position: startPosition,
+          columnIndex,
+          rowIndex,
+        })
+      }
+    }
+
+    return tileSettings
   }
 
   static getComputedStyle(el, prop, pseudo = null) {
@@ -80,16 +130,32 @@ class Thumbnails {
     }
   }
 
+  static mergeSettings(dest, src) {
+    return _.mergeWith(dest, src, (objValue, srcValue, key) => {
+      if (key === 'tileSettings') {
+        return _.unionBy(objValue, srcValue, obj => obj.position)
+      }
+
+      return undefined
+    })
+  }
+
+  setTileContainerBackground(url, left, top) {
+    this.tileContainer.style.background = `url(${url})`
+    this.tileContainer.style.backgroundPosition = `left ${left}px top ${top}px`
+    this.tileContainer.style.backgroundRepeat = 'no-repeat'
+  }
+
   prepareUi() {
-    const { src, tileWidth, tileHeight } = this.settings.grid
+    const { tileWidth, tileHeight } = this.settings.grid
+    const imageSrc = Thumbnails.getImageSrc()
+
     this.tileContainer = document.createElement('div')
 
     this.tileContainer.className = 'vjs-thumbnail'
-    this.tileContainer.style.background = `url(${src})`
     this.tileContainer.style.width = `${tileWidth}px`
     this.tileContainer.style.height = `${tileHeight}px`
-    this.tileContainer.style.backgroundPosition = 'left 0px top 0px'
-    this.tileContainer.style.backgroundRepeat = 'no-repeat'
+    this.setTileContainerBackground(imageSrc, 0, 0)
 
     const { progressControl } = this.player.controlBar
 
@@ -112,21 +178,26 @@ class Thumbnails {
     this.player.on('userinactive', this.moveCancel)
   }
 
-  mergeOptionsToSettings(options) {
-    _.mergeWith(this.settings, options, (objValue, srcValue, key) => {
-      if (key === 'tileSettings') {
-        return _.unionBy(objValue, srcValue, obj => obj.position)
-      }
-
-      return undefined
-    })
-
-    this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
-  }
-
   updateOptions(options) {
     Thumbnails.validateConstructorSettings(options)
-    this.mergeOptionsToSettings(options)
+
+    let validatedOptions = options
+
+    const tileSettings = Thumbnails.parseLeftToRightTileAllocation(options)
+    if (tileSettings.length) {
+      const newOptions = {
+        grid: {
+          tileSettings,
+        },
+      }
+
+      validatedOptions = Thumbnails.mergeSettings(validatedOptions, newOptions)
+    }
+
+    this.settings = Thumbnails.mergeSettings(this.settings, validatedOptions)
+
+    Thumbnails.validateTileSettings(this.settings)
+    this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
   }
 
   addFakeActivePseudoClass() {
@@ -152,9 +223,11 @@ class Thumbnails {
   }
 
   moveTileContainerBackground(currentTile) {
+    const imageSrc = Thumbnails.getImageSrc(currentTile)
     const left = -1 * currentTile.columnIndex * this.settings.grid.tileWidth
     const top = -1 * currentTile.rowIndex * this.settings.grid.tileHeight
-    this.tileContainer.style.backgroundPosition = `left ${left}px top ${top}px`
+
+    this.setTileContainerBackground(imageSrc, left, top)
   }
 
   moveOnProgressControl(event) {
