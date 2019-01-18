@@ -30,7 +30,7 @@ const config = generateRollupConfig({
       developmentStage = {
         serve: serve({
           open: true,
-          openPage: '/demo/example.html',
+          openPage: '/demo/index.html',
           contentBase: './',
           host: 'localhost',
           port: '10000',
