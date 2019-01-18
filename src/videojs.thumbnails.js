@@ -113,7 +113,14 @@ class Thumbnails {
   }
 
   mergeOptionsToSettings(options) {
-    _.merge(this.settings, options)
+    _.mergeWith(this.settings, options, (objValue, srcValue, key) => {
+      if (key === 'tileSettings') {
+        return _.unionBy(objValue, srcValue, obj => obj.position)
+      }
+
+      return undefined
+    })
+
     this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
   }
 
