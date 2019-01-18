@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import binarySearchClosetRange from './binary-search-closet-range'
+import binarySearchRange from './binary-search-range'
 
 import './videojs.thumbnails.css'
 
@@ -177,7 +177,7 @@ class Thumbnails {
       ) * this.player.duration()
     )
 
-    const [tileIndex] = binarySearchClosetRange(
+    const [tileIndex] = binarySearchRange(
       this.settings.grid.tileSettings,
       mouseTime,
       (list, index) => list[index].position,
