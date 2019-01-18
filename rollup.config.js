@@ -2,6 +2,7 @@ const generateRollupConfig = require('videojs-generate-rollup-config')
 const { eslint } = require('rollup-plugin-eslint')
 const serve = require('rollup-plugin-serve')
 const livereload = require('rollup-plugin-livereload')
+const css = require('rollup-plugin-css-only')
 
 const config = generateRollupConfig({
   input: 'src/videojs.thumbnails.js',
@@ -12,7 +13,7 @@ const config = generateRollupConfig({
     const newPlugins = {}
     writeKeys.forEach((key) => {
       newPlugins[key] = defaultPlugins[key]
-      newPlugins[key] = ['eslint'].concat(newPlugins[key])
+      newPlugins[key] = ['eslint', 'css'].concat(newPlugins[key])
       newPlugins[key] = newPlugins[key].concat(['serve', 'livereload'])
     })
 
@@ -23,7 +24,7 @@ const config = generateRollupConfig({
       eslint: eslint({
         useEslintrc: true,
         throwOnError: true,
-        exclude: ['dist/**', 'node_modules/**'],
+        exclude: ['dist/**', 'node_modules/**', 'src/**/*.css'],
       }),
       serve: serve({
         open: true,
@@ -35,6 +36,9 @@ const config = generateRollupConfig({
       livereload: livereload({
         watch: 'dist',
         verbose: true,
+      }),
+      css: css({
+        output: 'dist/videojs-thumbnails.css',
       }),
     })
   },
