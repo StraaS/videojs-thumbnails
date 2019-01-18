@@ -5,14 +5,12 @@ import './videojs.thumbnails.css'
 
 class Thumbnails {
   constructor(player, options) {
-    Thumbnails.validateConstructorSettings(options)
-
     this.player = player
     this.settings = {}
     this.moveOnProgressControl = this.moveOnProgressControl.bind(this)
     this.moveCancel = this.moveCancel.bind(this)
 
-    this.updateOptions(options)
+    this.initSettings(options)
     this.prepareUi()
     this.addFakeActivePseudoClass()
     this.installListeners()
@@ -23,17 +21,19 @@ class Thumbnails {
     return this.settings && this.settings.grid && this.settings.grid.src
   }
 
-  static validateConstructorSettings(options) {
+  static validateConstructorSettings(options, isInited = true) {
     if (!_.isObject(options.grid)) {
       throw new Error('`options.grid` must be an object')
     }
 
-    if (!_.isFinite(options.grid.tileWidth)) {
-      throw new Error('`options.grid.tileWidth` must be a number')
-    }
+    if (isInited) {
+      if (!_.isFinite(options.grid.tileWidth)) {
+        throw new Error('`options.grid.tileWidth` must be a number')
+      }
 
-    if (!_.isFinite(options.grid.tileHeight)) {
-      throw new Error('`options.grid.tileHeight` must be a number')
+      if (!_.isFinite(options.grid.tileHeight)) {
+        throw new Error('`options.grid.tileHeight` must be a number')
+      }
     }
   }
 
@@ -178,8 +178,8 @@ class Thumbnails {
     this.player.on('userinactive', this.moveCancel)
   }
 
-  updateOptions(options) {
-    Thumbnails.validateConstructorSettings(options)
+  mergeOptions(options, isInited) {
+    Thumbnails.validateConstructorSettings(options, isInited)
 
     let validatedOptions = options
 
@@ -198,6 +198,14 @@ class Thumbnails {
 
     Thumbnails.validateTileSettings(this.settings)
     this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
+  }
+
+  initSettings(options) {
+    this.mergeOptions(options, true)
+  }
+
+  updateOptions(options) {
+    this.mergeOptions(options, false)
   }
 
   addFakeActivePseudoClass() {
