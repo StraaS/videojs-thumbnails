@@ -5,6 +5,9 @@
     "> 1%",
     "not dead"
   ],
+  "main": "./dist/videojs-thumbnails.cjs.js",
+  "module": "./dist/videojs-thumbnails.es.js",
+  "style": "./dist/videojs-thumbnails.css",
   "eslintConfig": {
     "extends": "airbnb-base",
     "parser": "babel-eslint",
