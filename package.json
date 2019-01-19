@@ -70,6 +70,7 @@
     "rollup-plugin-eslint": "^5.0.0",
     "rollup-plugin-livereload": "^0.6.0",
     "rollup-plugin-serve": "^1.0.0",
+    "standard-version": "^4.4.0",
     "video.js": "^4.12",
     "videojs-generate-rollup-config": "^2.3.2"
   },
