@@ -5,3 +5,4 @@ test
 .editorconfig
 .travis.yml
 rollup.config.js
+CHANGELOG.md
