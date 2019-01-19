@@ -19,20 +19,34 @@ You probably want to include the default stylesheet, too. It handles showing and
 <link href="videojs.thumbnails.css" rel="stylesheet">
 ```
 
-Once you have your video created, you can activate the thumbnails plugin. In the first argument to the plugin, you should pass an object whose properties are the time in seconds you wish to display your thumbnails. At minimum, you'll need a prerty `0` with a `src`: the thumbnail to display if the user were to hover over the beginning of the progress bar. If you add additional times, they'll partition the progress bar and change the image that is displayed when the user hovers over that area. If you wanted to display one thumbnail for the first five seconds of a video and then another for the rest of the time, you could do it like this:
+After calling "videojs" function to create the video, you can activate the thumbnail plugin by specifying the options which schema lists as follows:
 
-```js
-video.thumbnails({
-  0: {
-    src: 'http://example.com/thumbnail1.png',
-    width: '120px'
-  },
-  5: {
-    src: 'http://example.com/thumbnail2.png'
+```javascript
+videojs.thumbnails({
+  grid: {
+    src: "the url of image source",
+    tileWidth: 100,
+    tileHeight: 100,
+    leftToRightAllocation: {
+      columnNumber: 3,
+      rowNumber: 3,
+      interval: 5,
+      startPosition: 0,
+    },
+    tileSettings: [
+      {
+        position: 10,
+        columnIndex: 0,
+        rowIndex: 0
+      }
+    ]
   }
-});
+})
 ```
 
-For each thumbnail time period, you can specify any other style changes you'd like to change when the user enters that region of the progress bar. Check out example.html to see how that technique can be used to create multiple thumbnails out of a single, sprited image.
+The src key of grid object is an URL pointing to an image that composed of small tile images to form a grid; each tile has the same width and height and can be accessed by the index of column and row.
 
-The `width` property on each time period lets us know what the visible portion of the thumbnail should be. This is so that thumbnails won't reach beyond the player and perhaps get cut off. It can be specified on each time period or on the `0` time period.
+To display the tile image at the correct time, specifying the position value which ranges from 0 to the video duration.
+When the position of the cursor on the progress bar is equal to or greater than the position of the specific tile setting, that tile will display on the progress bar.
+
+If the position of each tile has the same interval, and the order of tiles is from left to right, top to bottom, considering use "leftToRightAllocation" instead of specifying each tile option.
