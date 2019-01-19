@@ -1,5 +1,5 @@
 {
-  "name": "videojs-thumbnails",
+  "name": "@straas/videojs-thumbnails",
   "description": "progress bar thumbnails plugin for video.js",
   "browserslist": [
     "> 1%",
