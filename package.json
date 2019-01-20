@@ -16,7 +16,8 @@
       "es6": true
     },
     "globals": {
-      "videojs": true
+      "videojs": true,
+      "QUnit": true
     },
     "rules": {
       "semi": [
