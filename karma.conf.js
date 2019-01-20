@@ -30,6 +30,13 @@ module.exports = function configureKarma(config) {
       'test/**/*.test.js': ['rollup'],
     },
 
+    rollupPreprocessor: {
+      output: {
+        format: 'iife',
+        name: 'straasVideojsThumbnails',
+        sourcemap: 'inline',
+      },
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
