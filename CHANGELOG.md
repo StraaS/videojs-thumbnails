@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/StraaS/videojs-thumbnails/compare/v0.2.2...v0.3.0) (2019-01-21)
+
+
+### Features
+
+* allow pass an array to "leftToRightAllocation" property ([f644a49](https://github.com/StraaS/videojs-thumbnails/commit/f644a49))
+
+
+
 <a name="0.2.2"></a>
 ## [0.2.2](https://github.com/StraaS/videojs-thumbnails/compare/v0.2.1...v0.2.2) (2019-01-21)
 
