@@ -17,9 +17,11 @@ class Thumbnails {
     this.installListeners()
   }
 
-  getImageSrc(options) {
-    if (options && options.src) return options.src
-    return this.settings && this.settings.grid && this.settings.grid.src
+  getImageSrc(...options) {
+    options.push(this.settings && this.settings.grid)
+    const foundSrcOptions = options.find(option => option && option.src)
+
+    return (foundSrcOptions && foundSrcOptions.src) || ''
   }
 
   static validateConstructorSettings(options, isInited = true) {
@@ -61,44 +63,51 @@ class Thumbnails {
       return []
     }
 
-    if (!_.isObject(options.grid.leftToRightAllocation)) {
-      return []
-    }
-
     const { grid } = options
-    const { leftToRightAllocation } = grid
 
-    if (!_.isFinite(leftToRightAllocation.columnNumber)) {
-      throw new Error('`leftToRightAllocation.columnNumber` must be an number')
+    let { leftToRightAllocation } = options.grid
+    if (!Array.isArray(leftToRightAllocation)) {
+      leftToRightAllocation = [leftToRightAllocation]
     }
-
-    if (!_.isFinite(leftToRightAllocation.rowNumber)) {
-      throw new Error('`leftToRightAllocation.rowNumber` must be an number')
-    }
-
-    if (!_.isFinite(leftToRightAllocation.interval)) {
-      throw new Error('`leftToRightAllocation.interval` must be an number')
-    }
-
-    const { columnNumber, rowNumber, interval } = leftToRightAllocation
-    const src = this.getImageSrc(grid)
-
-    let startPosition = (leftToRightAllocation.startPosition || 0) - interval
 
     const tileSettings = []
 
-    for (let rowIndex = 0; rowIndex < rowNumber; ++rowIndex) {
-      for (let columnIndex = 0; columnIndex < columnNumber; ++columnIndex) {
-        startPosition += interval
-
-        tileSettings.push({
-          src,
-          position: startPosition,
-          columnIndex,
-          rowIndex,
-        })
+    leftToRightAllocation.forEach((allocation, index) => {
+      if (!_.isObject(allocation)) {
+        return
       }
-    }
+
+      if (!_.isFinite(allocation.columnNumber)) {
+        throw new Error(`\`leftToRightAllocation[${index}].columnNumber\` must be an number`)
+      }
+
+      if (!_.isFinite(allocation.rowNumber)) {
+        throw new Error(`\`leftToRightAllocation[${index}].rowNumber\` must be an number`)
+      }
+
+      if (!_.isFinite(allocation.interval)) {
+        throw new Error(`\`leftToRightAllocation[${index}].interval\` must be an number`)
+      }
+
+      const { columnNumber, rowNumber, interval } = allocation
+      const src = this.getImageSrc(allocation, grid)
+
+      let startPosition = (allocation.startPosition || 0) - interval
+
+
+      for (let rowIndex = 0; rowIndex < rowNumber; ++rowIndex) {
+        for (let columnIndex = 0; columnIndex < columnNumber; ++columnIndex) {
+          startPosition += interval
+
+          tileSettings.push({
+            src,
+            position: startPosition,
+            columnIndex,
+            rowIndex,
+          })
+        }
+      }
+    })
 
     return tileSettings
   }
