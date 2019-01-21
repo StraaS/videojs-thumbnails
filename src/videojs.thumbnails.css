@@ -2,7 +2,7 @@
 .vjs-thumbnail {
   position: absolute;
   left: -1000px;
-  bottom: 1.3em;
+  bottom: 4.0em;
   opacity: 0;
   transition: opacity .2s ease;
   -webkit-transition: opacity .2s ease;
