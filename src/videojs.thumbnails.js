@@ -273,16 +273,13 @@ class Thumbnails {
     // find the page offset of the mouse
     left = pageX || (event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft)
     // subtract the page offset of the positioned offset parent
-    left -= Thumbnails.offsetParent(progressControl.el()).getBoundingClientRect().left + pageXOffset
+    left -= progressControl.el().getBoundingClientRect().left + pageXOffset
 
     // apply updated styles to the thumbnail if necessary
     // mouseTime is the position of the mouse along the progress control bar
-    // `left` applies to the mouse position relative to the player so we need
-    // to remove the progress control's left offset to know the mouse position
-    // relative to the progress control
     mouseTime = Math.floor(
       (
-        (left - progressControl.el().offsetLeft) / progressControl.width()
+        left / progressControl.width()
         // eslint-disable-next-line
       ) * this.player.duration()
     )
@@ -319,10 +316,11 @@ class Thumbnails {
   }
 }
 
+const registerPlugin = videojs.registerPlugin || videojs.plugin
 /**
  * register the thubmnails plugin
  */
-videojs.plugin('thumbnails', function thumbnails(options) {
+registerPlugin.call(videojs, 'thumbnails', function thumbnails(options) {
   const thumbnailInstance = new Thumbnails(this, options)
 
   videojs.thumbnails = {
