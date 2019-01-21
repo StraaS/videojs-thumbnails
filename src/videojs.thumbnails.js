@@ -1,3 +1,4 @@
+import videojs from 'video.js'
 import * as _ from 'lodash'
 import binarySearchRange from './binary-search-range'
 
