@@ -22,7 +22,7 @@ class Thumbnails {
   }
 
   getPreloadSetting(...options) {
-    return Thumbnails.getOptionValueByKey('preload', '', this.settings, options)
+    return !!Thumbnails.getOptionValueByKey('preload', '', this.settings, options)
   }
 
   static getOptionValueByKey(key, defaultValue, mustHaveOptions, optionsList) {
@@ -65,6 +65,34 @@ class Thumbnails {
     if (validTileSettings.length !== options.grid.tileSettings.length) {
       throw new Error('`each element of options.grid.tileSettings` must have columnIndex and rowIndex keys which both are numerical values')
     }
+  }
+
+  static getSrcImageSetFromTiles(tileSettings) {
+    if (!Array.isArray(tileSettings)) {
+      return []
+    }
+
+    const srcImageAsKeys = tileSettings.reduce((accumulator, tile) => {
+      accumulator[tile.src] = 1
+      return accumulator
+    }, {})
+
+    return Object.keys(srcImageAsKeys)
+  }
+
+  static preloadImages(tileSettings) {
+    const srcImageList = Thumbnails.getSrcImageSetFromTiles(tileSettings)
+
+    const head = document.getElementsByTagName('head')[0]
+
+    srcImageList.forEach((srcImage) => {
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.href = srcImage
+      link.as = 'image'
+
+      head.appendChild(link)
+    })
   }
 
   parseLeftToRightTileAllocation(options) {
@@ -222,6 +250,10 @@ class Thumbnails {
     this.settings = Thumbnails.mergeSettings(this.settings, validatedOptions)
 
     Thumbnails.validateTileSettings(this.settings)
+
+    if (this.getPreloadSetting()) {
+      Thumbnails.preloadImages(this.settings.grid.tileSettings)
+    }
 
     this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
   }
