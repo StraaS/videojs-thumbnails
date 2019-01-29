@@ -18,10 +18,19 @@ class Thumbnails {
   }
 
   getImageSrc(...options) {
-    options.push(this.settings && this.settings.grid)
-    const foundSrcOptions = options.find(option => option && option.src)
+    return Thumbnails.getOptionValueByKey('src', '', this.settings && this.settings.grid, options)
+  }
 
-    return (foundSrcOptions && foundSrcOptions.src) || ''
+  getPreloadSetting(...options) {
+    return Thumbnails.getOptionValueByKey('preload', '', this.settings, options)
+  }
+
+  static getOptionValueByKey(key, defaultValue, mustHaveOptions, optionsList) {
+    optionsList = Array.isArray(optionsList) ? optionsList : [optionsList]
+    optionsList.push(mustHaveOptions)
+    const found = optionsList.find(option => option && option[key])
+
+    return (found && found[key]) || defaultValue
   }
 
   static validateConstructorSettings(options, isInited = true) {
