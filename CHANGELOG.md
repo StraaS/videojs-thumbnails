@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/StraaS/videojs-thumbnails/compare/v0.3.1...v0.4.0) (2019-01-29)
+
+
+### Bug Fixes
+
+* add some commits to republish 0.3.1 ([d4dbbbe](https://github.com/StraaS/videojs-thumbnails/commit/d4dbbbe))
+* prevent one image from being preload multiple times ([399e122](https://github.com/StraaS/videojs-thumbnails/commit/399e122))
+
+
+### Features
+
+* implement the codes to preload thumbnails images ([8daa244](https://github.com/StraaS/videojs-thumbnails/commit/8daa244))
+
+
+
 <a name="0.3.1"></a>
 ## [0.3.1](https://github.com/StraaS/videojs-thumbnails/compare/v0.3.0...v0.3.1) (2019-01-29)
 
