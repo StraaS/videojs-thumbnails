@@ -10,6 +10,7 @@ class Thumbnails {
     this.settings = {}
     this.moveOnProgressControl = this.moveOnProgressControl.bind(this)
     this.moveCancel = this.moveCancel.bind(this)
+    this.preloadImagesList = {}
 
     this.initSettings(options)
     this.prepareUi()
@@ -67,25 +68,33 @@ class Thumbnails {
     }
   }
 
-  static getSrcImageSetFromTiles(tileSettings) {
+  getImageSrcFromTiles(tileSettings) {
     if (!Array.isArray(tileSettings)) {
       return []
     }
 
     const srcImageAsKeys = tileSettings.reduce((accumulator, tile) => {
-      accumulator[tile.src] = 1
+      accumulator[tile.src] = false
       return accumulator
     }, {})
 
-    return Object.keys(srcImageAsKeys)
+    this.preloadImagesList = { ...srcImageAsKeys, ...this.preloadImagesList }
+
+    return Object.keys(this.preloadImagesList)
   }
 
-  static preloadImages(tileSettings) {
-    const srcImageList = Thumbnails.getSrcImageSetFromTiles(tileSettings)
+  preloadImages(tileSettings) {
+    const srcImageList = this.getImageSrcFromTiles(tileSettings)
 
     const head = document.getElementsByTagName('head')[0]
 
     srcImageList.forEach((srcImage) => {
+      if (this.preloadImagesList[srcImage]) {
+        return
+      }
+
+      this.preloadImagesList[srcImage] = true
+
       const link = document.createElement('link')
       link.rel = 'preload'
       link.href = srcImage
@@ -252,7 +261,7 @@ class Thumbnails {
     Thumbnails.validateTileSettings(this.settings)
 
     if (this.getPreloadSetting()) {
-      Thumbnails.preloadImages(this.settings.grid.tileSettings)
+      this.preloadImages(this.settings.grid.tileSettings)
     }
 
     this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
