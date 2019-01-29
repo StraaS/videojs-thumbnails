@@ -10,6 +10,7 @@ class Thumbnails {
     this.settings = {}
     this.moveOnProgressControl = this.moveOnProgressControl.bind(this)
     this.moveCancel = this.moveCancel.bind(this)
+    this.preloadImagesList = {}
 
     this.initSettings(options)
     this.prepareUi()
@@ -18,10 +19,19 @@ class Thumbnails {
   }
 
   getImageSrc(...options) {
-    options.push(this.settings && this.settings.grid)
-    const foundSrcOptions = options.find(option => option && option.src)
+    return Thumbnails.getOptionValueByKey('src', '', this.settings && this.settings.grid, options)
+  }
 
-    return (foundSrcOptions && foundSrcOptions.src) || ''
+  getPreloadSetting(...options) {
+    return !!Thumbnails.getOptionValueByKey('preload', '', this.settings, options)
+  }
+
+  static getOptionValueByKey(key, defaultValue, mustHaveOptions, optionsList) {
+    optionsList = Array.isArray(optionsList) ? optionsList : [optionsList]
+    optionsList.push(mustHaveOptions)
+    const found = optionsList.find(option => option && option[key])
+
+    return (found && found[key]) || defaultValue
   }
 
   static validateConstructorSettings(options, isInited = true) {
@@ -56,6 +66,42 @@ class Thumbnails {
     if (validTileSettings.length !== options.grid.tileSettings.length) {
       throw new Error('`each element of options.grid.tileSettings` must have columnIndex and rowIndex keys which both are numerical values')
     }
+  }
+
+  getImageSrcFromTiles(tileSettings) {
+    if (!Array.isArray(tileSettings)) {
+      return []
+    }
+
+    const srcImageAsKeys = tileSettings.reduce((accumulator, tile) => {
+      accumulator[tile.src] = false
+      return accumulator
+    }, {})
+
+    this.preloadImagesList = { ...srcImageAsKeys, ...this.preloadImagesList }
+
+    return Object.keys(this.preloadImagesList)
+  }
+
+  preloadImages(tileSettings) {
+    const srcImageList = this.getImageSrcFromTiles(tileSettings)
+
+    const head = document.getElementsByTagName('head')[0]
+
+    srcImageList.forEach((srcImage) => {
+      if (this.preloadImagesList[srcImage]) {
+        return
+      }
+
+      this.preloadImagesList[srcImage] = true
+
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.href = srcImage
+      link.as = 'image'
+
+      head.appendChild(link)
+    })
   }
 
   parseLeftToRightTileAllocation(options) {
@@ -213,6 +259,10 @@ class Thumbnails {
     this.settings = Thumbnails.mergeSettings(this.settings, validatedOptions)
 
     Thumbnails.validateTileSettings(this.settings)
+
+    if (this.getPreloadSetting()) {
+      this.preloadImages(this.settings.grid.tileSettings)
+    }
 
     this.settings.grid.tileSettings.sort((a, b) => a.position - b.position)
   }
